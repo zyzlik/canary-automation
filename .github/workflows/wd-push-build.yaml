@@ -25,16 +25,19 @@ jobs:
       - name: push
         run: |
           docker push zyzlik/canary-automation:latest
-  # deploy:
-  #   runs-on: [ubuntu]
-  #   needs: [build]
-  #   steps:
-  #     - uses: actions/checkout@v3
-      
-  #     - name: Update kubeconfig
-  #       shell: bash
-  #       run: aws eks --region us-east-1 update-kubeconfig --name canary-automation
-      
-  #     - name: Create job
-  #       shell: bash
-  #       run: helm3 upgrade --install automation ./kubernetes
+  deploy:
+    runs-on: [ubuntu]
+    needs: [build]
+    steps:
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@13d241b293754004c80624b5567555c4a39ffbe3
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_KEY }}
+          aws-region: us-east-2
+      - name: Configure kube config
+        run: |
+          aws eks list-clusters
+          # aws eks update-kubeconfig --name canary-automation
+          # kubectl config set-context arn:aws:eks:us-east-1:801176112578:cluster/canary-automation
+          # kubectl get ns

@@ -37,7 +37,7 @@ jobs:
           aws-region: us-east-2
       - name: Configure kube config
         run: |
-          aws eks list-clusters
-          # aws eks update-kubeconfig --name canary-automation
-          # kubectl config set-context arn:aws:eks:us-east-1:801176112578:cluster/canary-automation
-          # kubectl get ns
+          aws eks update-kubeconfig --name canary-automation
+          kubectl config set-context arn:aws:eks:us-east-1:801176112578:cluster/canary-automation
+          kubectl get ns
+          helm3 upgrade --install --create-namespace canary-automation ./kubernetes

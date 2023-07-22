@@ -14,11 +14,11 @@ jobs:
 
       - name: docker build
         run: |
-          docker build . -t canary-automation:latest
+          docker build . -t zyzlik/canary-automation:latest
       
       - name: push
         run: |
-          docker push canary-automation:latest
+          docker push zyzlik/canary-automation:latest
   # deploy:
   #   runs-on: [ubuntu]
   #   needs: [build]

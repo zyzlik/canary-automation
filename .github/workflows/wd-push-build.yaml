@@ -1,0 +1,34 @@
+name: Build and Deploy
+
+on:
+  push:
+    branches: [ "main" ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: [ubuntu]
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: docker build
+        run: |
+          docker build . -t canary-automation:latest
+      
+      - name: push
+        run: |
+          docker push canary-automation:latest
+  # deploy:
+  #   runs-on: [ubuntu]
+  #   needs: [build]
+  #   steps:
+  #     - uses: actions/checkout@v3
+      
+  #     - name: Update kubeconfig
+  #       shell: bash
+  #       run: aws eks --region us-east-1 update-kubeconfig --name canary-automation
+      
+  #     - name: Create job
+  #       shell: bash
+  #       run: helm3 upgrade --install automation ./kubernetes

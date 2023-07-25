@@ -39,7 +39,7 @@ jobs:
         run: |
           aws eks update-kubeconfig --name canary-automation
           kubectl config set-context arn:aws:eks:us-east-2:801176112578:cluster/canary-automation
-          kubectl get nodes
+          kubectl get ns
           kubectl describe -n kube-system configmap/aws-auth
 
           # kubectl get ns

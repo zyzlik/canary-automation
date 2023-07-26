@@ -41,4 +41,4 @@ jobs:
           aws eks update-kubeconfig --name canary-automation
           kubectl config set-context arn:aws:eks:us-east-2:801176112578:cluster/canary-automation
          
-          helm upgrade --install --create-namespace --cleanup-on-fail -n canary-automation canary-automation ./kubernetes 
+          helm upgrade --install --create-namespace --cleanup-on-fail --atomic -n canary-automation canary-automation ./kubernetes 

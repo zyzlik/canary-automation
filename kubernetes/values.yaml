@@ -17,5 +17,5 @@ fullnameOverride: ""
 podAnnotations: {}
 
 service:
-  type: ClusterIP
+  type: LoadBalancer
   port: 5000

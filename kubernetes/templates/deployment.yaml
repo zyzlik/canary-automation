@@ -21,6 +21,10 @@ spec:
         - name: {{ .Chart.Name }}
           image: "{{ .Values.image.name }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
+          env:
+          - name: TRACK
+            value: "{{ .Values.track }}"
+
           ports:
             - name: http
               containerPort: {{ .Values.service.port }}

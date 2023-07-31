@@ -24,4 +24,10 @@ jobs:
           helm upgrade --install --create-namespace \
           --cleanup-on-fail --atomic -n canary-automation \
           --set track=stable --set ingress=false \
-          canary-automation-stable ./kubernetes 
+          canary-automation-stable ./kubernetes
+
+          # Deploy ingress
+          helm upgrade --install --create-namespace \
+          --cleanup-on-fail --atomic -n canary-automation \
+          --set ingress=true \
+          canary-automation-ingress ./kubernetes

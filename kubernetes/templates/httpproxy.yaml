@@ -12,6 +12,13 @@ spec:
     - conditions:
       - prefix: /
       services:
-        - name: canary-automation-canary-test
+        - name: canary-automation-stable
           port: 5000
+          weight: {{ .Values.stable-weight | default 100 }}
+        - name: canary-automation-canary
+          port: 5000
+          weight: {{ .Values.canary-weight | default 0 }}
+        - name: canary-automation-baseline
+          port: 5000
+          weight: {{ .Values.baseline-weight | default 0 }}  
 {{- end }}

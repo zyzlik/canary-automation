@@ -46,3 +46,14 @@ jobs:
           --cleanup-on-fail --atomic -n canary-automation \
           --set track=canary --set ingress=false \
           canary-automation-canary ./kubernetes 
+
+          # Deploy baseline app
+          
+          # Deploy ingress with % of canary app and baseline app
+          # Compare metrics, wait
+          # Increase % of canary
+          # Compare metrics, wait
+          # Deploy canary as stable
+          # Set up 100% for stable
+          # Clean up canary
+          # Clean up baseline

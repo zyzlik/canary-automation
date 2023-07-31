@@ -1,4 +1,4 @@
-name: Build and Deploy
+name: "[PUSH, WD] Build and Deploy"
 
 on:
   # push:

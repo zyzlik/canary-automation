@@ -7,7 +7,7 @@ metadata:
   namespace: canary-automation
 spec:
   virtualhost:
-    fqdn: af8e2cb9bcd694fba84ccc0d3f205143-879495807.us-east-2.elb.amazonaws.com
+    fqdn: a945b0cb982324058803742493e8a547-54046033.us-east-2.elb.amazonaws.com
   routes:
     - conditions:
       - prefix: /

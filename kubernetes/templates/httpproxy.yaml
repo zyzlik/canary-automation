@@ -14,11 +14,11 @@ spec:
       services:
         - name: canary-automation-stable
           port: 5000
-          weight: {{ .Values.stable-weight | default 100 }}
+          weight: {{ .Values.stable_weight | default "100" }}
         - name: canary-automation-canary
           port: 5000
-          weight: {{ .Values.canary-weight | default 0 }}
+          weight: {{ .Values.canary_weight | default "0" }}
         - name: canary-automation-baseline
           port: 5000
-          weight: {{ .Values.baseline-weight | default 0 }}  
+          weight: {{ .Values.baseline_weight | default "0" }}  
 {{- end }}

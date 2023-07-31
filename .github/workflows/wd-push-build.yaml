@@ -52,7 +52,7 @@ jobs:
           # Deploy ingress with % of canary app and baseline app
           helm upgrade --install --create-namespace \
           --cleanup-on-fail --atomic -n canary-automation \
-          --set stable-weight=90 --set canary-weight=10 --set ingress=true \
+          --set stable_weight=90 --set canary_weight=10 --set ingress=true \
           canary-automation-ingress ./kubernetes
 
           # Compare metrics, wait

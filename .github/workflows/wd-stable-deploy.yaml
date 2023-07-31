@@ -1,4 +1,4 @@
-name: [WD] Deploy stable
+name: "[WD] Deploy stable"
 
 on:
   workflow_dispatch:

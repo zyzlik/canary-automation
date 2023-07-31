@@ -50,10 +50,29 @@ jobs:
           # Deploy baseline app
           
           # Deploy ingress with % of canary app and baseline app
+          helm upgrade --install --create-namespace \
+          --cleanup-on-fail --atomic -n canary-automation \
+          --set stable-weight=90 --set canary-weight=10 --set ingress=true \
+          canary-automation-ingress ./kubernetes
+
           # Compare metrics, wait
+          sleep 300
+
           # Increase % of canary
           # Compare metrics, wait
           # Deploy canary as stable
+          helm upgrade --install --create-namespace \
+          --cleanup-on-fail --atomic -n canary-automation \
+          --set track=stable --set ingress=false \
+          canary-automation-stable ./kubernetes
+
           # Set up 100% for stable
+          helm upgrade --install --create-namespace \
+          --cleanup-on-fail --atomic -n canary-automation \
+          --set ingress=true \
+          canary-automation-ingress ./kubernetes
+
           # Clean up canary
+          helm delete canary-automation-canary -n canary-automation
+          
           # Clean up baseline

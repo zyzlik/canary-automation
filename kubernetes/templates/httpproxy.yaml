@@ -15,10 +15,14 @@ spec:
         - name: canary-automation-stable
           port: 5000
           weight: {{ .Values.stable_weight | default "100" }}
+        {{ if .Values.canary_weight }}
         - name: canary-automation-canary
           port: 5000
-          weight: {{ .Values.canary_weight | default "0" }}
+          weight: {{ .Values.canary_weight }}
+        {{ env }}
+        {{ if .Values.baseline_weight }}
         - name: canary-automation-baseline
           port: 5000
           weight: {{ .Values.baseline_weight | default "0" }}  
+        {{ end }}
 {{- end }}

@@ -46,20 +46,24 @@ jobs:
           --cleanup-on-fail --atomic -n canary-automation \
           --set track=canary --set ingress=false \
           canary-automation-canary ./kubernetes 
-
-          # Deploy baseline app
-          
-          # Deploy ingress with % of canary app and baseline app
+      - name: deploy baseline
+        run: |
+          echo "baseline"
+      - name: set up routing
+        run: |
           helm upgrade --install --create-namespace \
           --cleanup-on-fail --atomic -n canary-automation \
           --set stable_weight=90 --set canary_weight=10 --set ingress=true \
           canary-automation-ingress ./kubernetes
-
+      - name: analyse
+        run: |
           # Compare metrics, wait
           sleep 300
 
           # Increase % of canary
           # Compare metrics, wait
+      - name: promote
+        run: |
           # Deploy canary as stable
           helm upgrade --install --create-namespace \
           --cleanup-on-fail --atomic -n canary-automation \
@@ -71,8 +75,3 @@ jobs:
           --cleanup-on-fail --atomic -n canary-automation \
           --set ingress=true \
           canary-automation-ingress ./kubernetes
-
-          # Clean up canary
-          helm delete canary-automation-canary -n canary-automation
-          
-          # Clean up baseline

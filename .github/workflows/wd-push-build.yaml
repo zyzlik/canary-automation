@@ -39,9 +39,9 @@ jobs:
       - name: get hostname
         id: hostname
         run: |
-        aws eks update-kubeconfig --name canary-automation
-        kubectl config set-context arn:aws:eks:us-east-2:801176112578:cluster/canary-automation
-        "::set-output name=hostname::$(kubectl get svc envoy -n projectcontour -o jsonpath='{.status.loadBalancer.ingress[].hostname}')"
+          aws eks update-kubeconfig --name canary-automation
+          kubectl config set-context arn:aws:eks:us-east-2:801176112578:cluster/canary-automation
+          "::set-output name=hostname::$(kubectl get svc envoy -n projectcontour -o jsonpath='{.status.loadBalancer.ingress[].hostname}')"
       - name: deploy canary
         run: |
           aws eks update-kubeconfig --name canary-automation

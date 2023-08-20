@@ -14,6 +14,12 @@ jobs:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_KEY }}
           aws-region: us-east-2
+      - name: get hostname
+        id: hostname
+        run: |
+          aws eks update-kubeconfig --name canary-automation
+          kubectl config set-context arn:aws:eks:us-east-2:801176112578:cluster/canary-automation
+          "::set-output name=hostname::$(kubectl get svc envoy -n projectcontour -o jsonpath='{.status.loadBalancer.ingress[].hostname}')"
       - name: deploy stable
         run: |
           aws eks update-kubeconfig --name canary-automation

@@ -28,5 +28,5 @@ jobs:
           # Deploy ingress
           helm upgrade --install --create-namespace \
           --cleanup-on-fail --atomic -n canary-automation \
-          --set ingress=true \
+          --set ingress=true  --set fqdn=${{ steps.hostname.outputs.hostname }} \
           canary-automation-ingress ./kubernetes

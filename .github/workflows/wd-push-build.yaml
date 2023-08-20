@@ -36,6 +36,12 @@ jobs:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_KEY }}
           aws-region: us-east-2
+      - name: get hostname
+        id: hostname
+        run: |
+          aws eks update-kubeconfig --name canary-automation
+          kubectl config set-context arn:aws:eks:us-east-2:801176112578:cluster/canary-automation
+          echo "::set-output name=hostname::$(kubectl get svc envoy -n projectcontour -o jsonpath='{.status.loadBalancer.ingress[].hostname}')"
       - name: deploy canary
         run: |
           aws eks update-kubeconfig --name canary-automation
@@ -54,6 +60,7 @@ jobs:
           helm upgrade --install --create-namespace \
           --cleanup-on-fail --atomic -n canary-automation \
           --set stable_weight=90 --set canary_weight=10 --set ingress=true \
+          --set fqdn=${{ steps.hostname.outputs.hostname }} \
           canary-automation-ingress ./kubernetes
       - name: analyse
         run: |
@@ -73,5 +80,5 @@ jobs:
           # Set up 100% for stable
           helm upgrade --install --create-namespace \
           --cleanup-on-fail --atomic -n canary-automation \
-          --set ingress=true \
+          --set ingress=true  --set fqdn=${{ steps.hostname.outputs.hostname }} \
           canary-automation-ingress ./kubernetes

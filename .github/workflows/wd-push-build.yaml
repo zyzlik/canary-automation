@@ -77,8 +77,8 @@ jobs:
           prometheus=$(kubectl get svc prometheus -n projectcontour-monitoring -o jsonpath='{.status.loadBalancer.ingress[].hostname}')
 
           # Get metrics
-          baseline=$(curl "${prometheus}:9090/api/v1/query?query=rate(flask_http_request_duration_seconds_sum\{track=\"baseline\"\}\[5m\])/rate(flask_http_request_duration_seconds_count\{track=\"baseline\"\}\[5m\])") | jq '.["data"]["result"][0]["value"][0]'
-          canary=$(curl "${prometheus}:9090/api/v1/query?query=rate(flask_http_request_duration_seconds_sum\{track=\"canary\"\}\[5m\])/rate(flask_http_request_duration_seconds_count\{track=\"canary\"\}\[5m\])') | jq '.["data"]["result"][0]["value"][0]'
+          baseline=$((curl "${prometheus}:9090/api/v1/query?query=rate(flask_http_request_duration_seconds_sum\{track=\"baseline\"\}\[5m\])/rate(flask_http_request_duration_seconds_count\{track=\"baseline\"\}\[5m\])") | jq '.["data"]["result"][1]["value"][0]')
+          canary=$((curl "${prometheus}:9090/api/v1/query?query=rate(flask_http_request_duration_seconds_sum\{track=\"canary\"\}\[5m\])/rate(flask_http_request_duration_seconds_count\{track=\"canary\"\}\[5m\])') | jq '.["data"]["result"][1]["value"][0]')
 
           # Compare metrics
           # If canary latency is worse than baseline, exit and rollback

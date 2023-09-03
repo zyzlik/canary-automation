@@ -54,22 +54,73 @@ jobs:
           canary-automation-canary ./kubernetes 
       - name: deploy baseline
         run: |
-          echo "baseline"
+          # Deploy baseline
+          helm upgrade --install --create-namespace \
+          --cleanup-on-fail --atomic -n canary-automation \
+          --set track=baseline --set ingress=false \
+          canary-automation-baseline ./kubernetes 
       - name: set up routing
         run: |
           helm upgrade --install --create-namespace \
           --cleanup-on-fail --atomic -n canary-automation \
-          --set stable_weight=90 --set canary_weight=10 --set ingress=true \
+          --set stable_weight=90 --set canary_weight=5 --set baseline_weight=5 --set ingress=true \
           --set fqdn=${{ steps.hostname.outputs.hostname }} \
           canary-automation-ingress ./kubernetes
-      - name: analyse
+      - name: analyze
+        id: analyze-stage-1
+        continue-on-error: true
         run: |
-          # Compare metrics, wait
-          sleep 300
+          # Wait for some traffic 
+          sleep 30
+
+          # Get Prometheus URL
+          prometheus=$(kubectl get svc prometheus -n projectcontour-monitoring -o jsonpath='{.status.loadBalancer.ingress[].hostname}')
+
+          # Get metrics
+          baseline=$(curl "${prometheus}:9090/api/v1/query?query=rate(flask_http_request_duration_seconds_sum\{track=\"baseline\"\}\[5m\])/rate(flask_http_request_duration_seconds_count\{track=\"baseline\"\}\[5m\])") | jq '.["data"]["result"][0]["value"][0]'
+          canary=$(curl "${prometheus}:9090/api/v1/query?query=rate(flask_http_request_duration_seconds_sum\{track=\"canary\"\}\[5m\])/rate(flask_http_request_duration_seconds_count\{track=\"canary\"\}\[5m\])') | jq '.["data"]["result"][0]["value"][0]'
+
+          # Compare metrics
+          # If canary latency is worse than baseline, exit and rollback
+          if [[ "$canary" -gt "$baseline" ]]; then
+            echo "::set-output name=result::failure"
+            exit 1
+          fi
 
           # Increase % of canary
+          helm upgrade --install --create-namespace \
+          --cleanup-on-fail --atomic -n canary-automation \
+          --set stable_weight=80 --set canary_weight=10 --set baseline_weight=10 --set ingress=true \
+          --set fqdn=${{ steps.hostname.outputs.hostname }} \
+          canary-automation-ingress ./kubernetes
+          
           # Compare metrics, wait
+          sleep 30
+          baseline=$(curl "${prometheus}:9090/api/v1/query?query=rate(flask_http_request_duration_seconds_sum\{track=\"baseline\"\}\[5m\])/rate(flask_http_request_duration_seconds_count\{track=\"baseline\"\}\[5m\])") | jq '.["data"]["result"][0]["value"][0]'
+          canary=$(curl "${prometheus}:9090/api/v1/query?query=rate(flask_http_request_duration_seconds_sum\{track=\"canary\"\}\[5m\])/rate(flask_http_request_duration_seconds_count\{track=\"canary\"\}\[5m\])') | jq '.["data"]["result"][0]["value"][0]'
+          
+          if [[ "$canary" -gt "$baseline" ]]; then
+            echo "::set-output name=result::failure"
+            exit 1
+          fi
+      
+      - name: rollback
+        if: ${{ contains(steps.analyze-stage-1.result, 'failure') }}
+        run: |
+          # Set up 100% for stable
+          helm upgrade --install --create-namespace \
+          --cleanup-on-fail --atomic -n canary-automation \
+          --set ingress=true  --set fqdn=${{ steps.hostname.outputs.hostname }} \
+          canary-automation-ingress ./kubernetes
+
+          # Delete canary
+          helm delete canary-automation-canary -n canary-automation
+
+          # Delete baseline
+          helm delete canary-automation-baseline -n canary-automation
+
       - name: promote
+        if: ${{ !contains(steps.analyze-stage-1.result, 'failure') }}
         run: |
           # Deploy canary as stable
           helm upgrade --install --create-namespace \
@@ -82,3 +133,9 @@ jobs:
           --cleanup-on-fail --atomic -n canary-automation \
           --set ingress=true  --set fqdn=${{ steps.hostname.outputs.hostname }} \
           canary-automation-ingress ./kubernetes
+
+          # Delete canary
+          helm delete canary-automation-canary -n canary-automation
+
+          # Delete baseline
+          helm delete canary-automation-baseline -n canary-automation

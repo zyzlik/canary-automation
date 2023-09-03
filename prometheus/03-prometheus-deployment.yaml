@@ -46,6 +46,7 @@ metadata:
   name: prometheus
   namespace: projectcontour-monitoring
 spec:
+  type: LoadBalancer
   ports:
   - protocol: TCP
     name: prometheus

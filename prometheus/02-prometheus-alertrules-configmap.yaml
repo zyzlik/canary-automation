@@ -15,3 +15,12 @@ data:
           severity: deadman
         annotations:
           description: This is a Dead Man's Switch alert meant to ensure that the Alerting pipeline is functional.
+    - name: high-latency
+      rules:
+      - alert: HighRequestLatency
+        expr: rate(flask_http_request_duration_seconds_sum[5m])/rate(flask_http_request_duration_seconds_count[5m])
+        for: 1m
+        labels:
+          severity: page
+        annotations:
+          summary: High request latency

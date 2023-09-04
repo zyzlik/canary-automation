@@ -1,6 +1,6 @@
 url=$(kubectl get svc envoy -n projectcontour -o jsonpath='{.status.loadBalancer.ingress[].hostname}')
 
-for _ in {1..50}
+while true
 do
     curl $url
     sleep 0.5

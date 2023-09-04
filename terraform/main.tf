@@ -11,8 +11,6 @@ terraform {
 
 provider "aws" {
   region  = "us-east-2"
-  access_key = "AKIA3VCORJXBGH74OCUR"
-  secret_key = "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"
 }
 
 module "eks" {

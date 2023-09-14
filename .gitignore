@@ -11,3 +11,4 @@ env
 env/lib/python3.11/
 env/lib/python3.11/*
 terraform/.terraform.tfstate.lock.info
+terraform/provider.tf

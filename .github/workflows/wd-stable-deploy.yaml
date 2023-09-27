@@ -19,7 +19,7 @@ jobs:
         run: |
           aws eks update-kubeconfig --name canary-automation
           kubectl config set-context arn:aws:eks:us-east-2:801176112578:cluster/canary-automation
-          echo "::set-output name=hostname::$(kubectl get svc envoy -n projectcontour -o jsonpath='{.status.loadBalancer.ingress[].hostname}')"
+          # echo "::set-output name=hostname::$(kubectl get svc envoy -n projectcontour -o jsonpath='{.status.loadBalancer.ingress[].hostname}')"
       - name: deploy stable
         run: |
           aws eks update-kubeconfig --name canary-automation
@@ -32,7 +32,7 @@ jobs:
           canary-automation-stable ./kubernetes
 
           # Deploy ingress
-          helm upgrade --install --create-namespace \
-          --cleanup-on-fail --atomic -n canary-automation \
-          --set ingress=true  --set fqdn=${{ steps.hostname.outputs.hostname }} \
-          canary-automation-ingress ./kubernetes
+          # helm upgrade --install --create-namespace \
+          # --cleanup-on-fail --atomic -n canary-automation \
+          # --set ingress=true  --set fqdn=${{ steps.hostname.outputs.hostname }} \
+          # canary-automation-ingress ./kubernetes

@@ -42,7 +42,7 @@ jobs:
           aws eks update-kubeconfig --name canary-automation
           kubectl config set-context arn:aws:eks:us-east-2:801176112578:cluster/canary-automation
           echo "::set-output name=hostname::$(kubectl get svc envoy -n projectcontour -o jsonpath='{.status.loadBalancer.ingress[].hostname}')"
-      - name: deploy canary 5%
+      - name: deploy canary
         run: |
           aws eks update-kubeconfig --name canary-automation
           kubectl config set-context arn:aws:eks:us-east-2:801176112578:cluster/canary-automation
@@ -52,7 +52,7 @@ jobs:
           --cleanup-on-fail --atomic -n canary-automation \
           --set track=canary --set ingress=false \
           canary-automation-canary ./kubernetes 
-      - name: deploy baseline 5%
+      - name: deploy baseline
         run: |
           # Deploy baseline
           helm upgrade --install --create-namespace \

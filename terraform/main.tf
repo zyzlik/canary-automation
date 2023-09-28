@@ -4,9 +4,15 @@ terraform {
       source  = "hashicorp/aws"
       version = "~> 4.16"
     }
+    kubernetes = {
+      source = "hashicorp/kubernetes"
+    }
   }
-
   required_version = ">= 1.2.0"
+}
+
+provider "aws" {
+  region  = "us-east-2"
 }
 
 module "eks" {
@@ -70,4 +76,8 @@ module "eks" {
       iam_role_attach_cni_policy = false
     }
   }
+<<<<<<< HEAD
 }
+=======
+}
+>>>>>>> afdaa9e (add main.tf)

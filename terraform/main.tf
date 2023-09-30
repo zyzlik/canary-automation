@@ -76,8 +76,4 @@ module "eks" {
       iam_role_attach_cni_policy = false
     }
   }
-<<<<<<< HEAD
 }
-=======
-}
->>>>>>> afdaa9e (add main.tf)

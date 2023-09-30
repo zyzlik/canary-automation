@@ -1,4 +1,4 @@
-name: "[WD] Deploy stable"
+name: "[WD] Deploy stable with Linkerd"
 
 on:
   workflow_dispatch:
@@ -28,11 +28,14 @@ jobs:
           # Deploy stable app
           helm upgrade --install --create-namespace \
           --cleanup-on-fail --atomic -n canary-automation \
-          --set track=stable --set ingress=false \
+          --set track=stable --set linkerd=false \
           canary-automation-stable ./kubernetes
+
+          # Add linkerd annotation
+          kubectl annotate ns canary-automation linkerd.io/inject=enabled
 
           # Deploy ingress
           helm upgrade --install --create-namespace \
           --cleanup-on-fail --atomic -n canary-automation \
-          --set ingress=true  --set fqdn=${{ steps.hostname.outputs.hostname }} \
+          --set linkerd=true  --set fqdn=${{ steps.hostname.outputs.hostname }} \
           canary-automation-ingress ./kubernetes

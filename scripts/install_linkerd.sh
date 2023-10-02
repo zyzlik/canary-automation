@@ -2,6 +2,8 @@ linkerd install --crds | kubectl apply -f -
 
 linkerd install | kubectl apply -f -
 
+linkerd viz install | kubectl apply -f -
+
 linkerd smi install | kubectl apply -f -
 
 # Install Contour Ingress

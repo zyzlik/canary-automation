@@ -33,6 +33,7 @@ jobs:
 
           # Add linkerd annotation
           kubectl annotate ns canary-automation linkerd.io/inject=enabled
+          kubectl get -n canary-automation deploy -o yaml | linkerd inject - | kubectl apply -f -
 
           # Deploy ingress
           helm upgrade --install --create-namespace \

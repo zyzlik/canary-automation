@@ -1,0 +1,33 @@
+# httpproxy.yaml
+{{- if eq .Values.track "canary" }}
+apiVersion: split.smi-spec.io/v1alpha2
+kind: TrafficSplit
+metadata:
+  name: canary-automation
+  namespace: canary-automation
+spec:
+  service: canary-automation-stable
+  backends:
+  - service: canary-automation-stable
+    weight: {{ .Values.stable_weight }}
+  - service: canary-automation-canary
+    weight: {{ .Values.canary_weight }}
+{{- end }}
+{{- if eq .Values.track "stable" }}
+apiVersion: projectcontour.io/v1
+kind: HTTPProxy
+metadata:
+  name: canary-automation
+  namespace: canary-automation
+spec:
+  routes:
+  - services:
+    - name: canary-automation-stable
+      port: 5000
+    requestHeadersPolicy:
+      set:
+      - name: l5d-dst-override
+        value: canary-automation-stable.canary-automation.svc.cluster.local:5000
+  virtualhost:
+    fqdn: {{ .Values.fqdn }}
+{{- end }}

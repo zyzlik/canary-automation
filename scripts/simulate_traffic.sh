@@ -4,5 +4,6 @@ touch response_time.txt
 while true
 do
     curl -o /dev/null -s -w '%{time_total}s\n' $url >> response_time.txt
-    sleep 0.5
+    curl $url
+    sleep 0.2
 done

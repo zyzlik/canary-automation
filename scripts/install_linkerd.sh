@@ -2,10 +2,11 @@ linkerd install --crds | kubectl apply -f -
 
 linkerd install | kubectl apply -f -
 
+linkerd viz install | kubectl apply -f -
+
 linkerd smi install | kubectl apply -f -
 
 # Install Contour Ingress
-
 kubectl apply -f https://projectcontour.io/quickstart/contour.yaml
 kubectl apply -f - << EOF
 apiVersion: v1

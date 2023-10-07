@@ -11,10 +11,6 @@ terraform {
   required_version = ">= 1.2.0"
 }
 
-provider "aws" {
-  region  = "us-east-2"
-}
-
 module "eks" {
   source  = "terraform-aws-modules/eks/aws"
   version = "~> 19.0"

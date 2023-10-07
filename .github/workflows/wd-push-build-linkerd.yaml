@@ -47,25 +47,20 @@ jobs:
           aws eks update-kubeconfig --name canary-automation
           kubectl config set-context arn:aws:eks:us-east-2:801176112578:cluster/canary-automation
          
-          # Deploy canary app
+          # Deploy canary app with 5% traffic
           helm upgrade --install --create-namespace \
           --cleanup-on-fail --atomic -n canary-automation \
-          --set track=canary --set ingress=false --set linkerd=false \
-          canary-automation-canary ./kubernetes 
-      - name: deploy baseline
-        run: |
-          # Deploy baseline
-          helm upgrade --install --create-namespace \
-          --cleanup-on-fail --atomic -n canary-automation \
-          --set track=baseline --set ingress=false \
-          canary-automation-baseline ./kubernetes 
-      - name: set up routing 5%
-        run: |
-          helm upgrade --install --create-namespace \
-          --cleanup-on-fail --atomic -n canary-automation \
-          --set stable_weight=90 --set canary_weight=5 --set baseline_weight=5 --set ingress=false --set linkerd=true \
-          --set fqdn=${{ steps.hostname.outputs.hostname }} \
-          canary-automation-ingress ./kubernetes
+          --set stable_weight=90 --set canary_weight=5 \
+          --set track=canary canary-automation-canary ./kubernetes-linkerd
+
+      # - name: deploy baseline
+      #   run: |
+      #     # Deploy baseline
+      #     helm upgrade --install --create-namespace \
+      #     --cleanup-on-fail --atomic -n canary-automation \
+      #     --set track=baseline --set ingress=false \
+      #     canary-automation-baseline ./kubernetes 
+  
       - name: analyze
         id: analyze-stage-1
         continue-on-error: true
@@ -89,17 +84,11 @@ jobs:
       - name: rollback
         if: ${{ contains(steps.analyze-stage-1.result, 'failure') }}
         run: |
-          # Set up 100% for stable
-          helm upgrade --install --create-namespace \
-          --cleanup-on-fail --atomic -n canary-automation \
-          --set ingress=true  --set fqdn=${{ steps.hostname.outputs.hostname }} \
-          canary-automation-ingress ./kubernetes
-
           # Delete canary
           helm delete canary-automation-canary -n canary-automation
 
           # Delete baseline
-          helm delete canary-automation-baseline -n canary-automation
+          # helm delete canary-automation-baseline -n canary-automation
   deploy-stage-2:
     runs-on: [ubuntu-latest]
     needs: [build, deploy-stage-1]
@@ -123,9 +112,9 @@ jobs:
           # Increase % of canary and baseline
           helm upgrade --install --create-namespace \
           --cleanup-on-fail --atomic -n canary-automation \
-          --set stable_weight=80 --set canary_weight=10 --set baseline_weight=10 --set ingress=true \
-          --set fqdn=${{ steps.hostname.outputs.hostname }} \
-          canary-automation-ingress ./kubernetes
+          --set stable_weight=90 --set canary_weight=10 \
+          --set track=canary canary-automation-canary ./kubernetes-linkerd
+
       - name: analyze
         id: analyze-stage-2
         continue-on-error: true
@@ -149,17 +138,11 @@ jobs:
       - name: rollback
         if: ${{ contains(steps.analyze-stage-2.result, 'failure') }}
         run: |
-          # Set up 100% for stable
-          helm upgrade --install --create-namespace \
-          --cleanup-on-fail --atomic -n canary-automation \
-          --set ingress=true  --set fqdn=${{ steps.hostname.outputs.hostname }} \
-          canary-automation-ingress ./kubernetes
-
           # Delete canary
           helm delete canary-automation-canary -n canary-automation
 
           # Delete baseline
-          helm delete canary-automation-baseline -n canary-automation
+          # helm delete canary-automation-baseline -n canary-automation
   promote:
     runs-on: [ubuntu-latest]
     needs: [build, deploy-stage-1, deploy-stage-2]
@@ -183,17 +166,10 @@ jobs:
           # Deploy canary as stable
           helm upgrade --install --create-namespace \
           --cleanup-on-fail --atomic -n canary-automation \
-          --set track=stable --set ingress=false \
-          canary-automation-stable ./kubernetes
-
-          # Set up 100% for stable
-          helm upgrade --install --create-namespace \
-          --cleanup-on-fail --atomic -n canary-automation \
-          --set ingress=true  --set fqdn=${{ steps.hostname.outputs.hostname }} \
-          canary-automation-ingress ./kubernetes
+          --set track=stable canary-automation-stable ./kubernetes-linkerd
 
           # Delete canary
           helm delete canary-automation-canary -n canary-automation
 
           # Delete baseline
-          helm delete canary-automation-baseline -n canary-automation
+          # helm delete canary-automation-baseline -n canary-automation

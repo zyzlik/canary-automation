@@ -28,15 +28,9 @@ jobs:
           # Deploy stable app
           helm upgrade --install --create-namespace \
           --cleanup-on-fail --atomic -n canary-automation \
-          --set track=stable --set linkerd=false  --set ingress=false \
-          canary-automation-stable ./kubernetes
+          --set fqdn=${{ steps.hostname.outputs.hostname }} \
+          canary-automation-stable ./kubernetes-linkerd
 
           # Add linkerd annotation
           kubectl annotate ns canary-automation linkerd.io/inject=enabled
           kubectl get -n canary-automation deploy -o yaml | linkerd inject - | kubectl apply -f -
-
-          # Deploy ingress
-          helm upgrade --install --create-namespace \
-          --cleanup-on-fail --atomic -n canary-automation \
-          --set linkerd=true --set ingress=false --set fqdn=${{ steps.hostname.outputs.hostname }} \
-          canary-automation-ingress ./kubernetes

@@ -93,7 +93,7 @@ jobs:
           helm upgrade --install --create-namespace \
           --cleanup-on-fail --atomic -n canary-automation \
           --set ingress=true  --set fqdn=${{ steps.hostname.outputs.hostname }} \
-          canary-automation-ingress ./kubernetes
+          canary-automation-ingress ./kubernetes-istio
 
           # Delete canary
           helm delete canary-automation-canary -n canary-automation
@@ -117,7 +117,7 @@ jobs:
         run: |
           aws eks update-kubeconfig --name canary-automation
           kubectl config set-context arn:aws:eks:us-east-2:801176112578:cluster/canary-automation
-          echo "::set-output name=hostname::$(kubectl get svc envoy -n projectcontour -o jsonpath='{.status.loadBalancer.ingress[].hostname}')"
+          echo "::set-output name=hostname::$(kubectl get svc istio-ingressgateway -n istio-system -o jsonpath='{.status.loadBalancer.ingress[].hostname}')"
       - name: increase % canary
         run: |
           # Increase % of canary and baseline
@@ -125,7 +125,7 @@ jobs:
           --cleanup-on-fail --atomic -n canary-automation \
           --set stable_weight=80 --set canary_weight=10 --set baseline_weight=10 --set ingress=true \
           --set fqdn=${{ steps.hostname.outputs.hostname }} \
-          canary-automation-ingress ./kubernetes
+          canary-automation-ingress ./kubernetes-istio
       - name: analyze
         id: analyze-stage-2
         continue-on-error: true
@@ -153,7 +153,7 @@ jobs:
           helm upgrade --install --create-namespace \
           --cleanup-on-fail --atomic -n canary-automation \
           --set ingress=true  --set fqdn=${{ steps.hostname.outputs.hostname }} \
-          canary-automation-ingress ./kubernetes
+          canary-automation-ingress ./kubernetes-istio
 
           # Delete canary
           helm delete canary-automation-canary -n canary-automation
@@ -184,13 +184,13 @@ jobs:
           helm upgrade --install --create-namespace \
           --cleanup-on-fail --atomic -n canary-automation \
           --set track=stable --set ingress=false \
-          canary-automation-stable ./kubernetes
+          canary-automation-stable ./kubernetes-istio
 
           # Set up 100% for stable
           helm upgrade --install --create-namespace \
           --cleanup-on-fail --atomic -n canary-automation \
           --set ingress=true  --set fqdn=${{ steps.hostname.outputs.hostname }} \
-          canary-automation-ingress ./kubernetes
+          canary-automation-ingress ./kubernetes-istio
 
           # Delete canary
           helm delete canary-automation-canary -n canary-automation

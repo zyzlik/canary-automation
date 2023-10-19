@@ -1,0 +1,49 @@
+{{- if .Values.ingress }}
+apiVersion: networking.istio.io/v1alpha3
+kind: Gateway
+metadata:
+  name: canary-automation
+spec:
+  # The selector matches the ingress gateway pod labels.
+  # If you installed Istio using Helm following the standard documentation, this would be "istio=ingress"
+  selector:
+    istio: ingressgateway # use istio default controller
+  servers:
+  - port:
+      number: 80
+      name: http
+      protocol: HTTP
+    hosts:
+    - {{ .Values.fqdn }}
+
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: canary-automation
+spec:
+  hosts:
+  - {{ .Values.fqdn }}
+  gateways:
+  - canary-automation
+  http:
+  - route:
+    - destination:
+        host: canary-automation-stable.canary-automation.svc.cluster.local
+        port:
+          number: 5000
+      weight: {{ .Values.stable_weight | default "100" }}
+    {{ if .Values.canary_weight }}
+    - destination:
+        host: canary-automation-canary.canary-automation.svc.cluster.local
+        port:
+          number: 5000
+      weight: {{ .Values.canary_weight }}
+    {{ end }}
+    {{ if .Values.baseline_weight }}
+    - destination:
+        host: canary-automation-baseline.canary-automation.svc.cluster.local
+        port:
+          number: 5000
+      weight: {{ .Values.baseline_weight }}
+    {{ end }}
+{{- end }}
